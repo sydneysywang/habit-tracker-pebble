@@ -29,7 +29,6 @@ const refs = {
 const ERRORS = {
   empty: 'Give your stone a name first, even a tiny one.',
   duplicate: 'That one is already in your pocket.',
-  full: 'Your pocket is full, and that’s plenty for one day. Maybe swap a boulder for a pebble?',
 };
 
 let state = load();

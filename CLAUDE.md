@@ -41,7 +41,7 @@ The entry point is `index.html`, which loads `js/app.js` with `<script type="mod
   - The physics works in jar-relative units scaled to the canvas size, which a `ResizeObserver` tracks. That keeps stones inside the jar across resizes.
   - The jar is rebuilt on load from `log[today]`.
   - Sound is synthesized with Web Audio (no audio files). It starts on the first user gesture, triggers on collision impulse with throttling, and has a mute toggle saved in localStorage.
-- **Pocket budget:** pebble=1, stone=2, boulder=3, max 10. Adding a habit over budget shows a soft message instead of adding it.
+- **No pocket limit:** any number of habits can be added. The pocket meter shows *stones still in pocket / total habits* (`0/0` when empty). Weight only affects stone size and look.
 
 ## Design language
 

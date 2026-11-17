@@ -2,7 +2,7 @@
 // the pocket, the 7-day grid and the labels around the jar. All user text is
 // set with textContent; the only innerHTML is static icon markup.
 
-import { WEIGHTS, WEIGHT_KEYS, POCKET_BUDGET, NAME_MAX, pocketLoad, isDone } from './habits.js';
+import { WEIGHTS, WEIGHT_KEYS, NAME_MAX, isDone } from './habits.js';
 import { lastNDays, keyToDate, longDayLabel } from './dates.js';
 import { chipRadius } from './stones.js';
 
@@ -169,23 +169,20 @@ function row(habit, done, ui) {
   return normalRow(habit, done);
 }
 
-function renderMeter(meter, state, today) {
-  const load = pocketLoad(state.habits);
-  const slots = [];
-  for (const habit of state.habits) {
-    const done = isDone(state, habit.id, today);
-    for (let i = 0; i < WEIGHTS[habit.weight].cost; i++) {
-      slots.push(h('span', { class: `slot slot--${habit.weight}${done ? ' is-out' : ''}` }));
-    }
-  }
-  while (slots.length < POCKET_BUDGET) slots.push(h('span', { class: 'slot' }));
+/** Stones still in the pocket out of all habits: one dot per habit, hollow once it's in the jar. */
+function renderMeter(meter, state, today, pendingCount) {
+  const total = state.habits.length;
+  const slots = state.habits.map((habit) => {
+    const inPocket = !isDone(state, habit.id, today);
+    return h('span', { class: `slot slot--${habit.weight}${inPocket ? '' : ' is-out'}` });
+  });
   meter.replaceChildren(
     h('span', { class: 'slots', 'aria-hidden': 'true' }, slots),
-    h('span', { class: 'meter-num', 'aria-hidden': 'true', text: `${load}/${POCKET_BUDGET}` }),
+    h('span', { class: 'meter-num', 'aria-hidden': 'true', text: `${pendingCount}/${total}` }),
   );
   meter.setAttribute('role', 'img');
-  meter.setAttribute('aria-label', `Pocket weight ${load} of ${POCKET_BUDGET}`);
-  meter.title = 'Pebble 1 · Stone 2 · Boulder 3';
+  meter.setAttribute('aria-label', `${pendingCount} of ${total} stones still in your pocket`);
+  meter.removeAttribute('title');
 }
 
 function renderPocketState(box, state, pendingCount) {
@@ -213,6 +210,7 @@ function renderPocketState(box, state, pendingCount) {
     );
   } else {
     box.hidden = true;
+    box.className = 'pocket-state';
     box.replaceChildren();
   }
 }
@@ -305,7 +303,7 @@ export function renderApp(refs, state, today, ui) {
   refs.doneList.replaceChildren(...done.map((x) => row(x, true, ui)));
   refs.doneWrap.hidden = done.length === 0;
   renderPocketState(refs.pocketState, state, pending.length);
-  renderMeter(refs.pocketMeter, state, today);
+  renderMeter(refs.pocketMeter, state, today, pending.length);
   renderWeek(refs.weekWrap, state, today);
 
   // Labels around the jar

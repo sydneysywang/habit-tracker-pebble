@@ -2,20 +2,15 @@
 // every function takes a state and returns a new one.
 
 export const WEIGHTS = {
-  pebble: { label: 'Tiny Pebble', short: 'Pebble', cost: 1 },
-  stone: { label: 'Smooth Stone', short: 'Stone', cost: 2 },
-  boulder: { label: 'Heavy Boulder', short: 'Boulder', cost: 3 },
+  pebble: { label: 'Tiny Pebble', short: 'Pebble' },
+  stone: { label: 'Smooth Stone', short: 'Stone' },
+  boulder: { label: 'Heavy Boulder', short: 'Boulder' },
 };
 export const WEIGHT_KEYS = Object.keys(WEIGHTS);
-export const POCKET_BUDGET = 10;
 export const NAME_MAX = 40;
 
 export function cleanName(raw) {
   return String(raw ?? '').replace(/\s+/g, ' ').trim().slice(0, NAME_MAX);
-}
-
-export function pocketLoad(habits, excludeId = null) {
-  return habits.reduce((sum, h) => (h.id === excludeId ? sum : sum + WEIGHTS[h.weight].cost), 0);
 }
 
 function newId() {
@@ -32,13 +27,12 @@ function isDuplicate(habits, name, excludeId = null) {
   return habits.some((h) => h.id !== excludeId && h.name.toLowerCase() === lower);
 }
 
-/** @returns {{state, habit?, error?: 'empty'|'duplicate'|'full'}} */
+/** @returns {{state, habit?, error?: 'empty'|'duplicate'}} */
 export function addHabit(state, rawName, weight) {
   const name = cleanName(rawName);
   if (!name) return { state, error: 'empty' };
   if (!WEIGHTS[weight]) weight = 'pebble';
   if (isDuplicate(state.habits, name)) return { state, error: 'duplicate' };
-  if (pocketLoad(state.habits) + WEIGHTS[weight].cost > POCKET_BUDGET) return { state, error: 'full' };
   const habit = { id: newId(), name, weight, createdAt: Date.now(), seed: randomSeed() };
   return { state: { ...state, habits: [...state.habits, habit] }, habit };
 }
@@ -50,7 +44,6 @@ export function editHabit(state, id, { name: rawName, weight }) {
   if (!name) return { state, error: 'empty' };
   if (!WEIGHTS[weight]) weight = current.weight;
   if (isDuplicate(state.habits, name, id)) return { state, error: 'duplicate' };
-  if (pocketLoad(state.habits, id) + WEIGHTS[weight].cost > POCKET_BUDGET) return { state, error: 'full' };
   const habits = state.habits.map((h) => (h.id === id ? { ...h, name, weight } : h));
   return { state: { ...state, habits } };
 }

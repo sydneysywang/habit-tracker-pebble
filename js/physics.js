@@ -15,6 +15,8 @@ export const WORLD_W = 100;
 export const WORLD_H = 126;
 export const RADIUS = { pebble: 5.6, stone: 8, boulder: 10.6 };
 const DENSITY = { pebble: 1, stone: 1.05, boulder: 1.2 };
+// Σr² the jar comfortably holds before stones start shrinking (~13 boulders or ~45 pebbles).
+const FILL_R2 = 1300;
 
 // Inner outline of the jar, as an open polyline from the left lip round to the right lip.
 const JAR_PTS = [
@@ -66,6 +68,7 @@ export function createJar(canvas, { onImpact = () => {}, prefersReducedMotion = 
   let drag = null;
   let silent = false;
   let nextId = 1;
+  let sizeScale = 1;
 
   function readColors() {
     const cs = getComputedStyle(canvas);
@@ -83,27 +86,22 @@ export function createJar(canvas, { onImpact = () => {}, prefersReducedMotion = 
 
   // ---------------------------------------------------------------- bodies
 
+  /** Size a body for the current jar fill, keeping mass ∝ area. */
+  function applySize(b) {
+    const r = (RADIUS[b.weight] || RADIUS.pebble) * sizeScale;
+    const m = r * r * (DENSITY[b.weight] || 1);
+    b.r = r;
+    b.im = 1 / m;
+    b.ii = 1 / (0.5 * m * r * r);
+  }
+
   function makeBody(habit) {
-    const r = RADIUS[habit.weight] || RADIUS.pebble;
-    const m = r * r * (DENSITY[habit.weight] || 1);
-    const x = 30 + Math.random() * 40;
-    let y = -r - 2;
-    // Stack above any stone that is still up near the spawn point.
-    for (let pass = 0; pass < 2; pass++) {
-      for (const b of bodies) {
-        if (Math.abs(b.x - x) < b.r + r && b.y - b.r - r - 2 < y) y = b.y - b.r - r - 2;
-      }
-    }
-    return {
+    const b = {
       id: nextId++,
       habitId: habit.id,
       weight: habit.weight,
       seed: habit.seed,
-      r,
-      im: 1 / m,
-      ii: 1 / (0.5 * m * r * r),
-      x,
-      y,
+      x: 30 + Math.random() * 40,
       vx: (Math.random() - 0.5) * 30,
       vy: 60,
       angle: Math.random() * TAU,
@@ -111,6 +109,15 @@ export function createJar(canvas, { onImpact = () => {}, prefersReducedMotion = 
       shape: makeStoneShape(habit.seed),
       dragged: false,
     };
+    applySize(b);
+    // Start above the rim, stacked over any stone that is still up near the spawn point.
+    b.y = -b.r - 2;
+    for (let pass = 0; pass < 2; pass++) {
+      for (const o of bodies) {
+        if (Math.abs(o.x - b.x) < o.r + b.r && o.y - o.r - b.r - 2 < b.y) b.y = o.y - o.r - b.r - 2;
+      }
+    }
+    return b;
   }
 
   function addBody(habit) {
@@ -135,12 +142,13 @@ export function createJar(canvas, { onImpact = () => {}, prefersReducedMotion = 
     queue = queue.filter((q) => want.get(q.habit.id)?.weight === q.habit.weight);
     const present = new Set([...bodies.map((b) => b.habitId), ...queue.map((q) => q.habit.id)]);
     const toAdd = habits.filter((h) => !present.has(h.id));
+    const resized = fitToJar(habits);
 
     if (prefersReducedMotion()) {
       queue.forEach((q) => addBody(q.habit));
       queue = [];
       toAdd.forEach(addBody);
-      if (toAdd.length) settleNow();
+      if (toAdd.length || resized) settleNow();
       fading = [];
       render();
       return;
@@ -149,7 +157,21 @@ export function createJar(canvas, { onImpact = () => {}, prefersReducedMotion = 
     const now = performance.now();
     toAdd.forEach((h, i) => queue.push({ habit: h, at: now + (initial ? 300 + i * 220 : i * 160) }));
     queue.sort((a, b) => a.at - b.at);
-    if (toAdd.length || fading.length) wake();
+    if (toAdd.length || fading.length || resized) wake();
+  }
+
+  /**
+   * There is no limit on habits, so once the stones' total area would overflow
+   * the jar, shrink every stone by the same factor so they all stay visible.
+   * Returns true if the size changed.
+   */
+  function fitToJar(habits) {
+    const total = habits.reduce((sum, h) => sum + (RADIUS[h.weight] || RADIUS.pebble) ** 2, 0);
+    const next = Math.min(1, Math.sqrt(FILL_R2 / Math.max(total, 1)));
+    if (Math.abs(next - sizeScale) < 0.001) return false;
+    sizeScale = next;
+    bodies.forEach(applySize);
+    return true;
   }
 
   /** Run the simulation silently until everything rests (reduced motion). */
