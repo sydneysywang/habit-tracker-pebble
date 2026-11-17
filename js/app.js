@@ -29,6 +29,7 @@ const refs = {
   todayLabel: $('today-label'),
   live: $('live'),
   mute: $('mute-btn'),
+  theme: $('theme-btn'),
 };
 
 const ERRORS = {
@@ -282,8 +283,39 @@ window.addEventListener('storage', (e) => {
   render();
 });
 
-// Colours come from CSS custom properties, so redraw the jar when the theme changes.
-window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => jar.refreshColors());
+// ------------------------------------------------------------------ theme
+
+// The inline script in index.html sets data-theme before first paint. Until the
+// user picks a theme with the toggle, follow the system preference.
+const systemDark = window.matchMedia('(prefers-color-scheme: dark)');
+const THEME_COLOR = { light: '#F6F1E7', dark: '#1F2428' };
+
+function currentTheme() {
+  return document.documentElement.dataset.theme === 'dark' ? 'dark' : 'light';
+}
+function applyTheme(theme) {
+  document.documentElement.dataset.theme = theme;
+  document.querySelector('meta[name="theme-color"]')?.setAttribute('content', THEME_COLOR[theme]);
+  const dark = theme === 'dark';
+  refs.theme.setAttribute('aria-pressed', String(dark));
+  refs.theme.title = dark ? 'Dark mode is on' : 'Dark mode is off';
+  // Jar colours come from CSS custom properties, so redraw it.
+  jar.refreshColors();
+}
+refs.theme.addEventListener('click', () => {
+  const next = currentTheme() === 'dark' ? 'light' : 'dark';
+  savePref('theme', next);
+  applyTheme(next);
+});
+systemDark.addEventListener('change', (e) => {
+  const saved = loadPref('theme', null);
+  if (saved !== 'light' && saved !== 'dark') applyTheme(e.matches ? 'dark' : 'light');
+});
+// Another tab flipped the toggle.
+window.addEventListener('storage', (e) => {
+  if (e.key === 'pebble.pref.theme') applyTheme(loadPref('theme', null) === 'dark' ? 'dark' : 'light');
+});
+applyTheme(currentTheme());
 
 // ------------------------------------------------------------------ boot
 

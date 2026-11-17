@@ -36,36 +36,36 @@
   color-scheme: light;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --paper: #1f2428;
-    --card: #2a3036;
-    --sand: #3a4148;
-    --sand-deep: #4d555d;
-    --line: #3b4249;
-    --ink: #efe7d8;
-    --ink-soft: #b7ad9c;
-    --accent: #d27a58;
-    --accent-ink: #1f2428;
-    --moss-deep: #a3b47f;
-    --focus: #e09a7c;
+/* The theme is set on <html data-theme> by the inline script in index.html:
+   the saved choice from the header toggle, or the system preference. */
+:root[data-theme="dark"] {
+  --paper: #1f2428;
+  --card: #2a3036;
+  --sand: #3a4148;
+  --sand-deep: #4d555d;
+  --line: #3b4249;
+  --ink: #efe7d8;
+  --ink-soft: #b7ad9c;
+  --accent: #d27a58;
+  --accent-ink: #1f2428;
+  --moss-deep: #a3b47f;
+  --focus: #e09a7c;
 
-    --stone-pebble: #8fa06c;
-    --stone-stone: #8794a0;
-    --stone-boulder: #d07a58;
+  --stone-pebble: #8fa06c;
+  --stone-stone: #8794a0;
+  --stone-boulder: #d07a58;
 
-    --glass-stroke: rgba(233, 223, 204, 0.45);
-    --glass-fill: rgba(255, 255, 255, 0.05);
-    --glass-shine: rgba(255, 255, 255, 0.14);
-    --jar-shadow: rgba(0, 0, 0, 0.35);
+  --glass-stroke: rgba(233, 223, 204, 0.45);
+  --glass-fill: rgba(255, 255, 255, 0.05);
+  --glass-shine: rgba(255, 255, 255, 0.14);
+  --jar-shadow: rgba(0, 0, 0, 0.35);
 
-    --shadow:
-      0 1px 0 rgba(255, 255, 255, 0.04) inset,
-      0 16px 34px -18px rgba(0, 0, 0, 0.6),
-      0 2px 6px -3px rgba(0, 0, 0, 0.4);
+  --shadow:
+    0 1px 0 rgba(255, 255, 255, 0.04) inset,
+    0 16px 34px -18px rgba(0, 0, 0, 0.6),
+    0 2px 6px -3px rgba(0, 0, 0, 0.4);
 
-    color-scheme: dark;
-  }
+  color-scheme: dark;
 }
 
 /* ---------------------------------------------------------------- base */
@@ -95,12 +95,10 @@ body {
   overflow-x: hidden;
 }
 
-@media (prefers-color-scheme: dark) {
-  body {
-    background-image:
-      radial-gradient(circle at 15% -10%, rgba(255, 255, 255, 0.04), transparent 45%),
-      radial-gradient(circle at 110% 110%, rgba(196, 106, 74, 0.08), transparent 50%);
-  }
+:root[data-theme="dark"] body {
+  background-image:
+    radial-gradient(circle at 15% -10%, rgba(255, 255, 255, 0.04), transparent 45%),
+    radial-gradient(circle at 110% 110%, rgba(196, 106, 74, 0.08), transparent 50%);
 }
 
 h1,
@@ -199,6 +197,23 @@ select {
 .tagline {
   color: var(--ink-soft);
   font-size: 0.95rem;
+}
+
+.topbar-tools {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex: none;
+}
+
+.theme-btn .icon-theme-dark {
+  display: none;
+}
+.theme-btn[aria-pressed="true"] .icon-theme-light {
+  display: none;
+}
+.theme-btn[aria-pressed="true"] .icon-theme-dark {
+  display: block;
 }
 
 .sound-btn .icon-sound-off {
