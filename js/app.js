@@ -29,6 +29,7 @@ const refs = {
   todayLabel: $('today-label'),
   live: $('live'),
   mute: $('mute-btn'),
+  theme: $('theme-btn'),
 };
 
 const ERRORS = {
@@ -282,8 +283,38 @@ window.addEventListener('storage', (e) => {
   render();
 });
 
-// Colours come from CSS custom properties, so redraw the jar when the theme changes.
-window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => jar.refreshColors());
+// ------------------------------------------------------------------ theme
+
+// The OS setting picks the theme (via the CSS media query). The toggle overrides
+// it for this page view only: nothing is saved, so a reload follows the OS again.
+const systemDark = window.matchMedia('(prefers-color-scheme: dark)');
+let chosenTheme = null; // 'light' | 'dark' once the toggle is used
+
+function currentTheme() {
+  return chosenTheme ?? (systemDark.matches ? 'dark' : 'light');
+}
+function renderTheme() {
+  const root = document.documentElement;
+  if (chosenTheme) root.dataset.theme = chosenTheme;
+  else delete root.dataset.theme;
+  const dark = currentTheme() === 'dark';
+  refs.theme.setAttribute('aria-pressed', String(dark));
+  refs.theme.title = dark ? 'Dark mode is on' : 'Dark mode is off';
+  // The browser bar colour matches --paper. With a chosen theme, both media-scoped
+  // metas get the same colour so the choice wins over the OS setting.
+  if (chosenTheme) {
+    const paper = getComputedStyle(root).getPropertyValue('--paper').trim();
+    for (const meta of document.querySelectorAll('meta[name="theme-color"]')) meta.content = paper;
+  }
+  // Jar colours come from CSS custom properties, so redraw it.
+  jar.refreshColors();
+}
+refs.theme.addEventListener('click', () => {
+  chosenTheme = currentTheme() === 'dark' ? 'light' : 'dark';
+  renderTheme();
+});
+systemDark.addEventListener('change', renderTheme);
+renderTheme();
 
 // ------------------------------------------------------------------ boot
 
