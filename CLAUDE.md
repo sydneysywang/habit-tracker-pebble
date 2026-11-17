@@ -45,6 +45,6 @@ The entry point is `index.html`, which loads `js/app.js` with `<script type="mod
 
 ## Design language
 
-- Palette tokens live on `:root` in `css/styles.css`: sand, slate, moss, terracotta, paper, ink. Stone colors are pebble = moss, stone = slate, boulder = terracotta. Dark tokens live under `:root[data-theme="dark"]`. An inline script in `index.html` sets `data-theme` before first paint, from the header toggle's saved pref (`pebble.pref.theme`) or else `prefers-color-scheme`.
+- Palette tokens live on `:root` in `css/styles.css`: sand, slate, moss, terracotta, paper, ink. Stone colors are pebble = moss, stone = slate, boulder = terracotta. Dark mode follows the OS via `prefers-color-scheme`. The header toggle sets `<html data-theme>` to override it for the current page view only (nothing is saved, so a reload goes back to the OS setting). The dark tokens therefore appear twice in `css/styles.css`, under the media query and under `:root[data-theme="dark"]`; keep them identical.
 - Tone is anti-hustle and guilt-free: no streak counters or punishing copy. With no habits, the page shows the empty jar and a playful prompt. When everything is ticked, it shows "Your pocket is empty".
 - Respect `prefers-reduced-motion`: stones appear already settled, with no drop animation.

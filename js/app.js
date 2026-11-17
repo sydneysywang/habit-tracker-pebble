@@ -285,37 +285,36 @@ window.addEventListener('storage', (e) => {
 
 // ------------------------------------------------------------------ theme
 
-// The inline script in index.html sets data-theme before first paint. Until the
-// user picks a theme with the toggle, follow the system preference.
+// The OS setting picks the theme (via the CSS media query). The toggle overrides
+// it for this page view only: nothing is saved, so a reload follows the OS again.
 const systemDark = window.matchMedia('(prefers-color-scheme: dark)');
-const THEME_COLOR = { light: '#F6F1E7', dark: '#1F2428' };
+let chosenTheme = null; // 'light' | 'dark' once the toggle is used
 
 function currentTheme() {
-  return document.documentElement.dataset.theme === 'dark' ? 'dark' : 'light';
+  return chosenTheme ?? (systemDark.matches ? 'dark' : 'light');
 }
-function applyTheme(theme) {
-  document.documentElement.dataset.theme = theme;
-  document.querySelector('meta[name="theme-color"]')?.setAttribute('content', THEME_COLOR[theme]);
-  const dark = theme === 'dark';
+function renderTheme() {
+  const root = document.documentElement;
+  if (chosenTheme) root.dataset.theme = chosenTheme;
+  else delete root.dataset.theme;
+  const dark = currentTheme() === 'dark';
   refs.theme.setAttribute('aria-pressed', String(dark));
   refs.theme.title = dark ? 'Dark mode is on' : 'Dark mode is off';
+  // The browser bar colour matches --paper. With a chosen theme, both media-scoped
+  // metas get the same colour so the choice wins over the OS setting.
+  if (chosenTheme) {
+    const paper = getComputedStyle(root).getPropertyValue('--paper').trim();
+    for (const meta of document.querySelectorAll('meta[name="theme-color"]')) meta.content = paper;
+  }
   // Jar colours come from CSS custom properties, so redraw it.
   jar.refreshColors();
 }
 refs.theme.addEventListener('click', () => {
-  const next = currentTheme() === 'dark' ? 'light' : 'dark';
-  savePref('theme', next);
-  applyTheme(next);
+  chosenTheme = currentTheme() === 'dark' ? 'light' : 'dark';
+  renderTheme();
 });
-systemDark.addEventListener('change', (e) => {
-  const saved = loadPref('theme', null);
-  if (saved !== 'light' && saved !== 'dark') applyTheme(e.matches ? 'dark' : 'light');
-});
-// Another tab flipped the toggle.
-window.addEventListener('storage', (e) => {
-  if (e.key === 'pebble.pref.theme') applyTheme(loadPref('theme', null) === 'dark' ? 'dark' : 'light');
-});
-applyTheme(currentTheme());
+systemDark.addEventListener('change', renderTheme);
+renderTheme();
 
 // ------------------------------------------------------------------ boot
 
