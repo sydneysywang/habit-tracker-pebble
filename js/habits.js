@@ -7,7 +7,7 @@ export const WEIGHTS = {
   boulder: { label: 'Heavy Boulder', short: 'Boulder', cost: 3 },
 };
 export const WEIGHT_KEYS = Object.keys(WEIGHTS);
-export const POCKET_BUDGET = 10;
+export const POCKET_BUDGET = 20;
 export const NAME_MAX = 40;
 
 export function cleanName(raw) {

@@ -11,28 +11,37 @@
 
 import { makeStoneShape, drawStone } from './stones.js';
 
-export const WORLD_W = 100;
-export const WORLD_H = 126;
+// The jar is designed in a 100 × 126 box and shrunk by JAR_SCALE in the
+// physics world, while stone radii stay fixed. A smaller JAR_SCALE means the
+// same stones fill more of the jar (and draw larger on screen). It is tuned so
+// a full pocket (POCKET_BUDGET in habits.js) fills the jar to about its shoulder.
+export const JAR_SCALE = 0.69;
+const S = JAR_SCALE;
+
+export const WORLD_W = 100 * S;
+export const WORLD_H = 126 * S;
 export const RADIUS = { pebble: 5.6, stone: 8, boulder: 10.6 };
 const DENSITY = { pebble: 1, stone: 1.05, boulder: 1.2 };
 
-// Inner outline of the jar, as an open polyline from the left lip round to the right lip.
-const JAR_PTS = [
+// Inner outline of the jar in design units, as an open polyline from the left
+// lip round to the right lip. JAR_PTS is the same outline in world units.
+const JAR_DESIGN = [
   [18, 5], [18, 14], [10, 24], [10, 109], [12.5, 116], [19, 119.5],
   [81, 119.5], [87.5, 116], [90, 109], [90, 24], [82, 14], [82, 5],
 ];
+const JAR_PTS = JAR_DESIGN.map(([x, y]) => [x * S, y * S]);
 const SEGMENTS = JAR_PTS.slice(0, -1).map(([ax, ay], i) => {
   const [bx, by] = JAR_PTS[i + 1];
   return { ax, ay, bx, by };
 });
-const FLOOR_Y = 119.5;
-const LEFT_X = 10;
-const RIGHT_X = 90;
-const NECK_L = 18;
-const NECK_R = 82;
-const NECK_Y = 14;
-const SHOULDER_Y = 24;
-const PAD = 0.9; // half the glass thickness
+const FLOOR_Y = 119.5 * S;
+const LEFT_X = 10 * S;
+const RIGHT_X = 90 * S;
+const NECK_L = 18 * S;
+const NECK_R = 82 * S;
+const NECK_Y = 14 * S;
+const SHOULDER_Y = 24 * S;
+const PAD = 0.9 * S; // half the glass thickness
 
 const STEP = 1 / 60;
 const SUB = 4;
@@ -86,7 +95,7 @@ export function createJar(canvas, { onImpact = () => {}, prefersReducedMotion = 
   function makeBody(habit) {
     const r = RADIUS[habit.weight] || RADIUS.pebble;
     const m = r * r * (DENSITY[habit.weight] || 1);
-    const x = 30 + Math.random() * 40;
+    const x = (30 + Math.random() * 40) * S;
     let y = -r - 2;
     // Stack above any stone that is still up near the spawn point.
     for (let pass = 0; pass < 2; pass++) {
@@ -343,19 +352,22 @@ export function createJar(canvas, { onImpact = () => {}, prefersReducedMotion = 
 
   // ---------------------------------------------------------------- drawing
 
+  // The jar is drawn in design units: callers wrap these in ctx.scale(S, S).
   function jarPath() {
     ctx.beginPath();
-    ctx.moveTo(JAR_PTS[0][0], JAR_PTS[0][1]);
-    for (let i = 1; i < JAR_PTS.length - 1; i++) {
-      const [x1, y1] = JAR_PTS[i];
-      const [x2, y2] = JAR_PTS[i + 1];
+    ctx.moveTo(JAR_DESIGN[0][0], JAR_DESIGN[0][1]);
+    for (let i = 1; i < JAR_DESIGN.length - 1; i++) {
+      const [x1, y1] = JAR_DESIGN[i];
+      const [x2, y2] = JAR_DESIGN[i + 1];
       ctx.arcTo(x1, y1, x2, y2, 4);
     }
-    const lastPt = JAR_PTS[JAR_PTS.length - 1];
+    const lastPt = JAR_DESIGN[JAR_DESIGN.length - 1];
     ctx.lineTo(lastPt[0], lastPt[1]);
   }
 
   function drawJarBack() {
+    ctx.save();
+    ctx.scale(S, S);
     ctx.beginPath();
     ctx.ellipse(50, 122.5, 40, 2.6, 0, 0, TAU);
     ctx.fillStyle = colors.jarShadow;
@@ -369,9 +381,12 @@ export function createJar(canvas, { onImpact = () => {}, prefersReducedMotion = 
     g.addColorStop(1, colors.glassFill);
     ctx.fillStyle = g;
     ctx.fill();
+    ctx.restore();
   }
 
   function drawJarFront() {
+    ctx.save();
+    ctx.scale(S, S);
     ctx.lineJoin = 'round';
     ctx.lineCap = 'round';
     jarPath();
@@ -402,6 +417,7 @@ export function createJar(canvas, { onImpact = () => {}, prefersReducedMotion = 
     ctx.moveTo(85, 40);
     ctx.lineTo(85, 56);
     ctx.stroke();
+    ctx.restore();
   }
 
   function render() {
