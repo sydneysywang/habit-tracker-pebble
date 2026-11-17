@@ -6,8 +6,6 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 **Pebble** is a minimalist, low-guilt habit tracker. Habits are weighted stones (Tiny Pebble / Smooth Stone / Heavy Boulder) kept in a limited "Daily Pocket". Ticking a habit drops an organically shaped stone into a 2D physics glass jar. There are no streaks: the pocket refills each day, and an empty pocket is the "done" state. The full approved design plan is at `~/.claude/plans/pasted-content-id-c429-plan-a-curried-dewdrop.md`.
 
-> Status: the repo is currently empty apart from `.gitignore`. The architecture below is the intended design, so update this file as the code lands.
-
 ## Hard constraints
 
 - **Vanilla HTML, CSS, and JavaScript (ES modules) only.** No React, no Next.js, no other framework or UI library, no npm dependencies, no bundler or build step, and no CDN JS libraries. The physics engine is hand-written. The only allowed external resource is a Google Fonts stylesheet.
@@ -24,6 +22,11 @@ python3 -m http.server 8000   # then open http://localhost:8000
 ```
 
 Verify by hand in the browser, using devtools responsive mode at 1280×800 and 375×667. To test the daily reset, edit the date keys of `localStorage["pebble.v1"].log` in devtools and reload.
+
+Node is not installed on the dev machine. For automated checks, use headless Chrome (`"/Applications/Google Chrome.app/Contents/MacOS/Google Chrome" --headless=new --virtual-time-budget=… --dump-dom <url>`) against a small test page that imports the modules and writes results into the DOM. Gotchas:
+- Headless Chrome barely fires `requestAnimationFrame`. Either shim it with `setTimeout` in the test page, or create the jar with `prefersReducedMotion: () => true`, which settles stones synchronously.
+- Headless windows can't be narrower than ~500px. Test 375px inside a 375px-wide `<iframe>`.
+- `jar.snapshot()` returns body positions and velocities for assertions.
 
 ## Architecture
 
