@@ -2,7 +2,7 @@
 // the pocket, the 7-day grid and the labels around the jar. All user text is
 // set with textContent; the only innerHTML is static icon markup.
 
-import { WEIGHTS, WEIGHT_KEYS, POCKET_BUDGET, NAME_MAX, pocketLoad, isDone } from './habits.js';
+import { WEIGHTS, WEIGHT_KEYS, NAME_MAX, POCKET_BUDGET, pocketLoad, isDone } from './habits.js';
 import { lastNDays, keyToDate, longDayLabel } from './dates.js';
 import { chipRadius } from './stones.js';
 
@@ -45,9 +45,18 @@ function chip(habit, extra = '') {
   });
 }
 
+/** A chip centered in a fixed-width slot, so names line up whatever the weight. */
+function chipSlot(habit, small = false) {
+  return h(
+    'span',
+    { class: `chip-slot${small ? ' chip-slot--sm' : ''}`, 'aria-hidden': 'true' },
+    chip(habit, small ? 'chip--sm' : ''),
+  );
+}
+
 // ------------------------------------------------------------------ pocket
 
-function normalRow(habit, done) {
+function normalRow(habit, done, editMode) {
   const { id, name } = habit;
   return h(
     'li',
@@ -64,14 +73,14 @@ function normalRow(habit, done) {
       h('span', { class: 'tick-box', 'aria-hidden': 'true' }),
       h('span', { class: 'sr-only', text: `${name}, done today` }),
     ),
-    chip(habit),
+    chipSlot(habit),
     h(
       'span',
       { class: 'habit-text' },
-      h('span', { class: 'habit-name', text: name, title: 'Double-click to edit', dataset: { dbl: 'edit', id } }),
+      h('span', { class: 'habit-name', text: name }),
       h('span', { class: 'habit-weight', text: WEIGHTS[habit.weight].label }),
     ),
-    h('button', {
+    editMode && h('button', {
       type: 'button',
       class: 'icon-btn',
       'aria-label': `Edit ${name}`,
@@ -79,7 +88,7 @@ function normalRow(habit, done) {
       dataset: { action: 'edit', id, focus: `edit:${id}` },
       html: ICON_EDIT,
     }),
-    h('button', {
+    editMode && h('button', {
       type: 'button',
       class: 'icon-btn icon-btn--danger',
       'aria-label': `Remove ${name}`,
@@ -166,26 +175,17 @@ function confirmRow(habit) {
 function row(habit, done, ui) {
   if (ui.editingId === habit.id) return editRow(habit, ui.editError);
   if (ui.confirmingId === habit.id) return confirmRow(habit);
-  return normalRow(habit, done);
+  return normalRow(habit, done, ui.editMode);
 }
 
-function renderMeter(meter, state, today) {
-  const load = pocketLoad(state.habits);
-  const slots = [];
-  for (const habit of state.habits) {
-    const done = isDone(state, habit.id, today);
-    for (let i = 0; i < WEIGHTS[habit.weight].cost; i++) {
-      slots.push(h('span', { class: `slot slot--${habit.weight}${done ? ' is-out' : ''}` }));
-    }
-  }
-  while (slots.length < POCKET_BUDGET) slots.push(h('span', { class: 'slot' }));
+/** Unticked stones out of all habits, e.g. "3/5". */
+function renderMeter(meter, state, pendingCount) {
+  const total = state.habits.length;
   meter.replaceChildren(
-    h('span', { class: 'slots', 'aria-hidden': 'true' }, slots),
-    h('span', { class: 'meter-num', 'aria-hidden': 'true', text: `${load}/${POCKET_BUDGET}` }),
+    h('span', { class: 'meter-num', 'aria-hidden': 'true', text: `${pendingCount}/${total}` }),
   );
   meter.setAttribute('role', 'img');
-  meter.setAttribute('aria-label', `Pocket weight ${load} of ${POCKET_BUDGET}`);
-  meter.title = 'Pebble 1 · Stone 2 · Boulder 3';
+  meter.setAttribute('aria-label', `${pendingCount} of ${total} stones still in your pocket`);
 }
 
 function renderPocketState(box, state, pendingCount) {
@@ -213,6 +213,7 @@ function renderPocketState(box, state, pendingCount) {
     );
   } else {
     box.hidden = true;
+    box.className = 'pocket-state';
     box.replaceChildren();
   }
 }
@@ -248,7 +249,7 @@ function renderWeek(wrap, state, today) {
       h(
         'th',
         { scope: 'row', class: 'wk-name' },
-        h('span', { class: 'wk-name-inner' }, chip(habit, 'chip--sm'), h('span', { class: 'wk-name-text', title: habit.name, text: habit.name })),
+        h('span', { class: 'wk-name-inner' }, chipSlot(habit, true),h('span', { class: 'wk-name-text', title: habit.name, text: habit.name })),
       ),
       days.map(({ key }) => {
         const done = isDone(state, habit.id, key);
@@ -305,8 +306,17 @@ export function renderApp(refs, state, today, ui) {
   refs.doneList.replaceChildren(...done.map((x) => row(x, true, ui)));
   refs.doneWrap.hidden = done.length === 0;
   renderPocketState(refs.pocketState, state, pending.length);
-  renderMeter(refs.pocketMeter, state, today);
+  renderMeter(refs.pocketMeter, state, pending.length);
+  refs.budgetLoad.textContent = pocketLoad(state.habits);
+  for (const el of refs.budgetMax) el.textContent = POCKET_BUDGET;
   renderWeek(refs.weekWrap, state, today);
+
+  // Edit mode: the pencil in the pocket header reveals edit/remove on each row.
+  if (!state.habits.length) ui.editMode = false;
+  refs.editModeBtn.hidden = !state.habits.length;
+  refs.editModeBtn.setAttribute('aria-pressed', String(ui.editMode));
+  refs.editModeBtn.classList.toggle('is-on', ui.editMode);
+  refs.pocketCard.classList.toggle('is-edit-mode', ui.editMode);
 
   // Labels around the jar
   refs.todayLabel.textContent = longDayLabel(keyToDate(today));

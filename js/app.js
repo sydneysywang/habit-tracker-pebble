@@ -2,7 +2,7 @@
 
 import { load, save, loadPref, savePref, STORAGE_KEY } from './storage.js';
 import { dateKey } from './dates.js';
-import { WEIGHTS, addHabit, editHabit, deleteHabit, toggleDone, isDone } from './habits.js';
+import { WEIGHTS, NAME_MAX, addHabit, editHabit, deleteHabit, toggleDone, isDone } from './habits.js';
 import { createJar } from './physics.js';
 import * as sound from './sound.js';
 import { renderApp, PLACEHOLDERS } from './ui.js';
@@ -18,6 +18,10 @@ const refs = {
   pocketState: $('pocket-state'),
   pocketMeter: $('pocket-meter'),
   pocketCard: $('pocket-card'),
+  editModeBtn: $('edit-mode-btn'),
+  budgetBtn: $('budget-btn'),
+  budgetLoad: $('budget-load'),
+  budgetMax: [$('budget-max'), $('budget-max-2')],
   weekWrap: $('week-wrap'),
   jarCanvas: $('jar-canvas'),
   jarEmpty: $('jar-empty'),
@@ -35,7 +39,7 @@ const ERRORS = {
 
 let state = load();
 let today = dateKey();
-const ui = { editingId: null, editError: null, confirmingId: null, pendingFocus: null };
+const ui = { editMode: false, editingId: null, editError: null, confirmingId: null, pendingFocus: null };
 
 const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
 const jar = createJar(refs.jarCanvas, {
@@ -145,7 +149,7 @@ refs.pocketCard.addEventListener('click', (e) => {
     case 'confirm-delete': {
       const habit = habitById(id);
       ui.confirmingId = null;
-      ui.pendingFocus = 'add';
+      ui.pendingFocus = state.habits.length > 1 ? 'edit-mode' : 'add';
       commit(deleteHabit(state, id));
       if (habit) announce(`Let go of “${habit.name}”.`);
       break;
@@ -153,9 +157,12 @@ refs.pocketCard.addEventListener('click', (e) => {
   }
 });
 
-refs.pocketCard.addEventListener('dblclick', (e) => {
-  const name = e.target.closest('[data-dbl="edit"]');
-  if (name) startEdit(name.dataset.id);
+refs.editModeBtn.addEventListener('click', () => {
+  ui.editMode = !ui.editMode;
+  ui.editingId = ui.confirmingId = null;
+  ui.editError = null;
+  ui.pendingFocus = 'edit-mode';
+  render();
 });
 
 refs.pocketCard.addEventListener('submit', (e) => {
@@ -178,12 +185,30 @@ refs.pocketCard.addEventListener('submit', (e) => {
   announce('Saved.');
 });
 
+// ------------------------------------------------------------------ budget hint
+
+const hintOpen = () => refs.budgetBtn.getAttribute('aria-expanded') === 'true';
+function setHint(open) {
+  refs.budgetBtn.setAttribute('aria-expanded', String(open));
+}
+refs.budgetBtn.addEventListener('click', () => setHint(!hintOpen()));
+document.addEventListener('click', (e) => {
+  if (hintOpen() && !e.target.closest('.add-head')) setHint(false);
+});
+
 refs.pocketCard.addEventListener('keydown', (e) => {
   if (e.key !== 'Escape') return;
-  if (ui.editingId) cancelEdit();
+  if (hintOpen()) {
+    setHint(false);
+    refs.budgetBtn.focus();
+  } else if (ui.editingId) cancelEdit();
   else if (ui.confirmingId) {
     ui.pendingFocus = `delete:${ui.confirmingId}`;
     ui.confirmingId = null;
+    render();
+  } else if (ui.editMode) {
+    ui.editMode = false;
+    ui.pendingFocus = 'edit-mode';
     render();
   }
 });
@@ -239,6 +264,7 @@ function checkDay() {
   const now = dateKey();
   if (now === today) return;
   today = now;
+  ui.editMode = false;
   ui.editingId = ui.confirmingId = null;
   render();
   announce('A fresh day. Your pocket is full again.');
@@ -261,6 +287,7 @@ window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () 
 
 // ------------------------------------------------------------------ boot
 
+refs.input.maxLength = NAME_MAX; // keep the add input in sync with the limit in habits.js
 shufflePlaceholder();
 render({ initial: true });
 if (!state.habits.length && window.matchMedia('(pointer: fine)').matches) {

@@ -1,4 +1,4 @@
-/* Pebble: warm, organic, tactile. */
+/* Pebbles: warm, organic, tactile. */
 
 :root {
   --paper: #f6f1e7;
@@ -117,6 +117,11 @@ select {
   color: inherit;
 }
 
+/* `hidden` must win over any component display rule (e.g. .pocket-state.is-complete). */
+[hidden] {
+  display: none !important;
+}
+
 :focus-visible {
   outline: 3px solid var(--focus);
   outline-offset: 2px;
@@ -216,15 +221,11 @@ select {
   gap: 16px;
   grid-template-columns: minmax(0, 1fr);
   grid-template-areas:
-    "add"
     "jar"
     "pocket"
     "week";
 }
 
-.add-card {
-  grid-area: add;
-}
 .jar-card {
   grid-area: jar;
 }
@@ -239,9 +240,8 @@ select {
   .layout {
     gap: 20px;
     grid-template-columns: minmax(300px, 460px) minmax(0, 1fr);
-    grid-template-rows: auto auto 1fr;
+    grid-template-rows: auto 1fr;
     grid-template-areas:
-      "jar add"
       "jar pocket"
       "jar week";
     align-items: start;
@@ -290,8 +290,81 @@ select {
   letter-spacing: -0.005em;
 }
 
-.add-card .card-title {
-  margin-bottom: 12px;
+.add-wrap {
+  margin-top: 20px;
+  padding-top: 4px;
+  border-top: 1px solid var(--line);
+}
+.add-head {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: 16px 0 10px;
+}
+.add-head .sub-title {
+  margin: 0;
+}
+
+/* Small "?" next to "Pick up a stone": explains points and the daily limit. */
+.hint-btn {
+  width: 22px;
+  height: 22px;
+  flex: none;
+  display: inline-grid;
+  place-items: center;
+  border: 1.5px solid var(--line);
+  border-radius: 50%;
+  background: var(--paper);
+  color: var(--ink-soft);
+  font: inherit;
+  font-size: 0.75rem;
+  font-weight: 700;
+  line-height: 1;
+  cursor: pointer;
+  position: relative;
+}
+/* Bigger invisible hit area for touch. */
+.hint-btn::after {
+  content: '';
+  position: absolute;
+  inset: -11px;
+}
+.hint-btn:hover,
+.hint-btn[aria-expanded='true'] {
+  background: var(--sand);
+  color: var(--ink);
+}
+.hint-bubble {
+  display: none;
+  position: absolute;
+  top: calc(100% + 8px);
+  left: 0;
+  z-index: 5;
+  width: min(300px, 100%);
+  padding: 10px 12px;
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  box-shadow: var(--shadow);
+  color: var(--ink);
+  font-size: 0.85rem;
+  line-height: 1.45;
+}
+.hint-bubble p + p {
+  margin-top: 6px;
+}
+.hint-bubble .hint-now {
+  color: var(--ink-soft);
+  font-variant-numeric: tabular-nums;
+}
+.hint-btn[aria-expanded='true'] + .hint-bubble {
+  display: block;
+}
+@media (hover: hover) {
+  .hint-btn:hover + .hint-bubble {
+    display: block;
+  }
 }
 
 .sub-title {
@@ -439,6 +512,17 @@ select {
   height: 14px;
 }
 
+/* Fixed-width box (the boulder's width) so names after a chip all start at the same x. */
+.chip-slot {
+  flex: none;
+  width: 24px;
+  display: inline-grid;
+  place-items: center;
+}
+.chip-slot--sm {
+  width: 16px;
+}
+
 /* ---------------------------------------------------------------- add form */
 
 .add-form {
@@ -548,38 +632,40 @@ select {
 
 /* ---------------------------------------------------------------- pocket */
 
+.pocket-tools {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+.edit-mode-btn {
+  width: auto;
+  min-width: 44px;
+  padding: 0 10px;
+  border-radius: 22px;
+}
+.edit-mode-btn .edit-done {
+  display: none;
+  font-weight: 700;
+  font-size: 0.9rem;
+}
+.edit-mode-btn.is-on {
+  background: var(--sand);
+  color: var(--ink);
+}
+.edit-mode-btn.is-on .icon-edit {
+  display: none;
+}
+.edit-mode-btn.is-on .edit-done {
+  display: inline;
+}
+
 .pocket-meter {
   display: flex;
   align-items: center;
   gap: 8px;
 }
-.slots {
-  display: flex;
-  gap: 3px;
-}
-.slot {
-  width: 9px;
-  height: 9px;
-  border-radius: 50%;
-  border: 1.5px solid var(--sand-deep);
-}
-.slot--pebble {
-  background: var(--stone-pebble);
-  border-color: var(--stone-pebble);
-}
-.slot--stone {
-  background: var(--stone-stone);
-  border-color: var(--stone-stone);
-}
-.slot--boulder {
-  background: var(--stone-boulder);
-  border-color: var(--stone-boulder);
-}
-.slot.is-out {
-  background: transparent;
-}
 .meter-num {
-  font-size: 0.8rem;
+  font-size: 0.95rem;
   font-weight: 700;
   color: var(--ink-soft);
   font-variant-numeric: tabular-nums;
@@ -592,11 +678,6 @@ select {
   display: grid;
   grid-template-columns: minmax(0, 1fr);
   gap: 6px;
-}
-.habit-list[hidden],
-.done-wrap[hidden],
-.pocket-state[hidden] {
-  display: none;
 }
 
 .habit-row {
@@ -674,7 +755,6 @@ select {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  cursor: text;
 }
 .habit-weight {
   font-size: 0.8rem;
@@ -781,7 +861,7 @@ select {
   .wk-day-col {
     width: 2rem;
   }
-  .wk-name .chip {
+  .wk-name .chip-slot {
     display: none;
   }
 }

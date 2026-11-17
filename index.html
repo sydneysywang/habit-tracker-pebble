@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Pebble · collect stones, not streaks</title>
+  <title>Pebbles · Small stones. Zero hustle.</title>
   <meta name="description" content="A calm, low-guilt habit tracker. Tick a habit and drop a stone into your jar.">
   <meta name="theme-color" content="#F6F1E7" media="(prefers-color-scheme: light)">
   <meta name="theme-color" content="#22272C" media="(prefers-color-scheme: dark)">
@@ -24,8 +24,8 @@
         <ellipse cx="12.5" cy="14" rx="3.5" ry="2" fill="#fff" opacity=".35"/>
       </svg>
       <div>
-        <h1 class="brand-name">Pebble</h1>
-        <p class="tagline">Collect little stones, not streaks.</p>
+        <h1 class="brand-name">Pebbles</h1>
+        <p class="tagline">Small stones. Zero hustle. Habit Tracker.</p>
       </div>
     </div>
     <button id="mute-btn" class="icon-btn sound-btn" type="button" aria-pressed="false">
@@ -42,31 +42,6 @@
   </header>
 
   <main class="layout">
-    <section class="card add-card" aria-labelledby="add-title">
-      <h2 id="add-title" class="card-title">Pick up a stone</h2>
-      <form id="add-form" class="add-form" autocomplete="off" novalidate>
-        <label for="habit-name" class="sr-only">New habit</label>
-        <input id="habit-name" class="text-input" name="name" type="text" maxlength="40" enterkeyhint="done" placeholder="Drink a glass of water">
-        <button type="submit" class="btn btn-primary">Add</button>
-        <fieldset class="weight-picker">
-          <legend class="sr-only">How heavy does it feel?</legend>
-          <label class="weight-opt">
-            <input type="radio" name="weight" value="pebble" checked>
-            <span class="weight-face"><span class="chip chip--pebble" aria-hidden="true"></span><span><span class="w-long">Tiny </span>Pebble</span></span>
-          </label>
-          <label class="weight-opt">
-            <input type="radio" name="weight" value="stone">
-            <span class="weight-face"><span class="chip chip--stone" aria-hidden="true"></span><span><span class="w-long">Smooth </span>Stone</span></span>
-          </label>
-          <label class="weight-opt">
-            <input type="radio" name="weight" value="boulder">
-            <span class="weight-face"><span class="chip chip--boulder" aria-hidden="true"></span><span><span class="w-long">Heavy </span>Boulder</span></span>
-          </label>
-        </fieldset>
-      </form>
-      <p id="form-msg" class="soft-msg" role="status" aria-live="polite"></p>
-    </section>
-
     <section class="card jar-card" aria-labelledby="jar-title">
       <div class="card-head">
         <h2 id="jar-title" class="card-title">Today’s jar</h2>
@@ -85,13 +60,53 @@
     <section id="pocket-card" class="card pocket-card" aria-labelledby="pocket-title">
       <div class="card-head">
         <h2 id="pocket-title" class="card-title">Daily pocket</h2>
-        <div id="pocket-meter" class="pocket-meter"></div>
+        <div class="pocket-tools">
+          <div id="pocket-meter" class="pocket-meter"></div>
+          <button id="edit-mode-btn" class="icon-btn edit-mode-btn" type="button" aria-pressed="false" data-focus="edit-mode" title="Edit habits">
+            <span class="sr-only">Edit habits</span>
+            <svg class="icon-edit" viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" focusable="false"><path d="M4 20h4L19 9a2.8 2.8 0 0 0-4-4L4 16v4Z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><path d="m13.5 6.5 4 4" stroke="currentColor" stroke-width="1.8"/></svg>
+            <span class="edit-done" aria-hidden="true">Done</span>
+          </button>
+        </div>
       </div>
       <div id="pocket-state" class="pocket-state" hidden></div>
       <ul id="pocket-list" class="habit-list" aria-label="Still in your pocket"></ul>
       <div id="done-wrap" class="done-wrap" hidden>
         <h3 class="sub-title">In the jar today</h3>
         <ul id="done-list" class="habit-list habit-list--done"></ul>
+      </div>
+      <div class="add-wrap">
+        <div class="add-head">
+          <h3 id="add-title" class="sub-title">Pick up a stone</h3>
+          <button id="budget-btn" class="hint-btn" type="button" aria-expanded="false" aria-controls="budget-hint" aria-label="How points work">?</button>
+          <div id="budget-hint" class="hint-bubble">
+            <p>Each habit costs points by weight: <strong>Pebble 1 · Stone 2 · Boulder 3</strong>.</p>
+            <p>Your pocket holds up to <strong id="budget-max">20</strong> points, and it refills every day.</p>
+            <p>Keeping it light is the point: a few habits you can actually finish feel better than a long list that weighs you down.</p>
+            <p class="hint-now">Carrying now: <span id="budget-load">0</span> of <span id="budget-max-2">20</span>.</p>
+          </div>
+        </div>
+        <form id="add-form" class="add-form" autocomplete="off" novalidate>
+          <label for="habit-name" class="sr-only">New habit</label>
+          <input id="habit-name" class="text-input" name="name" type="text" maxlength="28" enterkeyhint="done" placeholder="Drink a glass of water">
+          <button type="submit" class="btn btn-primary">Add</button>
+          <fieldset class="weight-picker">
+            <legend class="sr-only">How heavy does it feel?</legend>
+            <label class="weight-opt">
+              <input type="radio" name="weight" value="pebble" checked>
+              <span class="weight-face"><span class="chip chip--pebble" aria-hidden="true"></span><span><span class="w-long">Tiny </span>Pebble</span></span>
+            </label>
+            <label class="weight-opt">
+              <input type="radio" name="weight" value="stone">
+              <span class="weight-face"><span class="chip chip--stone" aria-hidden="true"></span><span><span class="w-long">Smooth </span>Stone</span></span>
+            </label>
+            <label class="weight-opt">
+              <input type="radio" name="weight" value="boulder">
+              <span class="weight-face"><span class="chip chip--boulder" aria-hidden="true"></span><span><span class="w-long">Heavy </span>Boulder</span></span>
+            </label>
+          </fieldset>
+        </form>
+        <p id="form-msg" class="soft-msg" role="status" aria-live="polite"></p>
       </div>
     </section>
 
@@ -105,7 +120,7 @@
   </main>
 
   <footer class="foot muted small">
-    Everything stays in this browser. No accounts, no servers, no guilt.
+    Your habits are saved only in this browser. Clearing your browsing data will clear them too.
   </footer>
 
   <div id="live" class="sr-only" aria-live="polite"></div>
