@@ -47,7 +47,7 @@ function chip(habit, extra = '') {
 
 // ------------------------------------------------------------------ pocket
 
-function normalRow(habit, done) {
+function normalRow(habit, done, editMode) {
   const { id, name } = habit;
   return h(
     'li',
@@ -68,10 +68,10 @@ function normalRow(habit, done) {
     h(
       'span',
       { class: 'habit-text' },
-      h('span', { class: 'habit-name', text: name, title: 'Double-click to edit', dataset: { dbl: 'edit', id } }),
+      h('span', { class: 'habit-name', text: name }),
       h('span', { class: 'habit-weight', text: WEIGHTS[habit.weight].label }),
     ),
-    h('button', {
+    editMode && h('button', {
       type: 'button',
       class: 'icon-btn',
       'aria-label': `Edit ${name}`,
@@ -79,7 +79,7 @@ function normalRow(habit, done) {
       dataset: { action: 'edit', id, focus: `edit:${id}` },
       html: ICON_EDIT,
     }),
-    h('button', {
+    editMode && h('button', {
       type: 'button',
       class: 'icon-btn icon-btn--danger',
       'aria-label': `Remove ${name}`,
@@ -166,7 +166,7 @@ function confirmRow(habit) {
 function row(habit, done, ui) {
   if (ui.editingId === habit.id) return editRow(habit, ui.editError);
   if (ui.confirmingId === habit.id) return confirmRow(habit);
-  return normalRow(habit, done);
+  return normalRow(habit, done, ui.editMode);
 }
 
 /** Unticked stones out of all habits, e.g. "3/5". */
@@ -299,6 +299,15 @@ export function renderApp(refs, state, today, ui) {
   renderPocketState(refs.pocketState, state, pending.length);
   renderMeter(refs.pocketMeter, state, pending.length);
   renderWeek(refs.weekWrap, state, today);
+
+  // Edit mode: the pencil in the pocket header reveals edit/remove on each row.
+  if (!state.habits.length) ui.editMode = false;
+  refs.editModeBtn.hidden = !state.habits.length;
+  refs.editModeBtn.setAttribute('aria-pressed', String(ui.editMode));
+  refs.editModeBtn.classList.toggle('is-on', ui.editMode);
+  refs.editModeBtn.title = ui.editMode ? 'Done editing' : 'Edit habits';
+  refs.editModeBtn.querySelector('.sr-only').textContent = ui.editMode ? 'Done editing habits' : 'Edit habits';
+  refs.pocketCard.classList.toggle('is-edit-mode', ui.editMode);
 
   // Labels around the jar
   refs.todayLabel.textContent = longDayLabel(keyToDate(today));

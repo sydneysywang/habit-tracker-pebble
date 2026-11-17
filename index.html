@@ -42,31 +42,6 @@
   </header>
 
   <main class="layout">
-    <section class="card add-card" aria-labelledby="add-title">
-      <h2 id="add-title" class="card-title">Pick up a stone</h2>
-      <form id="add-form" class="add-form" autocomplete="off" novalidate>
-        <label for="habit-name" class="sr-only">New habit</label>
-        <input id="habit-name" class="text-input" name="name" type="text" maxlength="40" enterkeyhint="done" placeholder="Drink a glass of water">
-        <button type="submit" class="btn btn-primary">Add</button>
-        <fieldset class="weight-picker">
-          <legend class="sr-only">How heavy does it feel?</legend>
-          <label class="weight-opt">
-            <input type="radio" name="weight" value="pebble" checked>
-            <span class="weight-face"><span class="chip chip--pebble" aria-hidden="true"></span><span><span class="w-long">Tiny </span>Pebble</span></span>
-          </label>
-          <label class="weight-opt">
-            <input type="radio" name="weight" value="stone">
-            <span class="weight-face"><span class="chip chip--stone" aria-hidden="true"></span><span><span class="w-long">Smooth </span>Stone</span></span>
-          </label>
-          <label class="weight-opt">
-            <input type="radio" name="weight" value="boulder">
-            <span class="weight-face"><span class="chip chip--boulder" aria-hidden="true"></span><span><span class="w-long">Heavy </span>Boulder</span></span>
-          </label>
-        </fieldset>
-      </form>
-      <p id="form-msg" class="soft-msg" role="status" aria-live="polite"></p>
-    </section>
-
     <section class="card jar-card" aria-labelledby="jar-title">
       <div class="card-head">
         <h2 id="jar-title" class="card-title">Today’s jar</h2>
@@ -85,13 +60,44 @@
     <section id="pocket-card" class="card pocket-card" aria-labelledby="pocket-title">
       <div class="card-head">
         <h2 id="pocket-title" class="card-title">Daily pocket</h2>
-        <div id="pocket-meter" class="pocket-meter"></div>
+        <div class="pocket-tools">
+          <div id="pocket-meter" class="pocket-meter"></div>
+          <button id="edit-mode-btn" class="icon-btn edit-mode-btn" type="button" aria-pressed="false" data-focus="edit-mode" title="Edit habits">
+            <span class="sr-only">Edit habits</span>
+            <svg class="icon-edit" viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" focusable="false"><path d="M4 20h4L19 9a2.8 2.8 0 0 0-4-4L4 16v4Z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><path d="m13.5 6.5 4 4" stroke="currentColor" stroke-width="1.8"/></svg>
+            <span class="edit-done" aria-hidden="true">Done</span>
+          </button>
+        </div>
       </div>
       <div id="pocket-state" class="pocket-state" hidden></div>
       <ul id="pocket-list" class="habit-list" aria-label="Still in your pocket"></ul>
       <div id="done-wrap" class="done-wrap" hidden>
         <h3 class="sub-title">In the jar today</h3>
         <ul id="done-list" class="habit-list habit-list--done"></ul>
+      </div>
+      <div class="add-wrap">
+        <h3 id="add-title" class="sub-title">Pick up a stone</h3>
+        <form id="add-form" class="add-form" autocomplete="off" novalidate>
+          <label for="habit-name" class="sr-only">New habit</label>
+          <input id="habit-name" class="text-input" name="name" type="text" maxlength="40" enterkeyhint="done" placeholder="Drink a glass of water">
+          <button type="submit" class="btn btn-primary">Add</button>
+          <fieldset class="weight-picker">
+            <legend class="sr-only">How heavy does it feel?</legend>
+            <label class="weight-opt">
+              <input type="radio" name="weight" value="pebble" checked>
+              <span class="weight-face"><span class="chip chip--pebble" aria-hidden="true"></span><span><span class="w-long">Tiny </span>Pebble</span></span>
+            </label>
+            <label class="weight-opt">
+              <input type="radio" name="weight" value="stone">
+              <span class="weight-face"><span class="chip chip--stone" aria-hidden="true"></span><span><span class="w-long">Smooth </span>Stone</span></span>
+            </label>
+            <label class="weight-opt">
+              <input type="radio" name="weight" value="boulder">
+              <span class="weight-face"><span class="chip chip--boulder" aria-hidden="true"></span><span><span class="w-long">Heavy </span>Boulder</span></span>
+            </label>
+          </fieldset>
+        </form>
+        <p id="form-msg" class="soft-msg" role="status" aria-live="polite"></p>
       </div>
     </section>
 

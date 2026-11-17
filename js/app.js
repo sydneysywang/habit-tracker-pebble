@@ -18,6 +18,7 @@ const refs = {
   pocketState: $('pocket-state'),
   pocketMeter: $('pocket-meter'),
   pocketCard: $('pocket-card'),
+  editModeBtn: $('edit-mode-btn'),
   weekWrap: $('week-wrap'),
   jarCanvas: $('jar-canvas'),
   jarEmpty: $('jar-empty'),
@@ -35,7 +36,7 @@ const ERRORS = {
 
 let state = load();
 let today = dateKey();
-const ui = { editingId: null, editError: null, confirmingId: null, pendingFocus: null };
+const ui = { editMode: false, editingId: null, editError: null, confirmingId: null, pendingFocus: null };
 
 const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
 const jar = createJar(refs.jarCanvas, {
@@ -145,7 +146,7 @@ refs.pocketCard.addEventListener('click', (e) => {
     case 'confirm-delete': {
       const habit = habitById(id);
       ui.confirmingId = null;
-      ui.pendingFocus = 'add';
+      ui.pendingFocus = state.habits.length > 1 ? 'edit-mode' : 'add';
       commit(deleteHabit(state, id));
       if (habit) announce(`Let go of “${habit.name}”.`);
       break;
@@ -153,9 +154,12 @@ refs.pocketCard.addEventListener('click', (e) => {
   }
 });
 
-refs.pocketCard.addEventListener('dblclick', (e) => {
-  const name = e.target.closest('[data-dbl="edit"]');
-  if (name) startEdit(name.dataset.id);
+refs.editModeBtn.addEventListener('click', () => {
+  ui.editMode = !ui.editMode;
+  ui.editingId = ui.confirmingId = null;
+  ui.editError = null;
+  ui.pendingFocus = 'edit-mode';
+  render();
 });
 
 refs.pocketCard.addEventListener('submit', (e) => {
@@ -184,6 +188,10 @@ refs.pocketCard.addEventListener('keydown', (e) => {
   else if (ui.confirmingId) {
     ui.pendingFocus = `delete:${ui.confirmingId}`;
     ui.confirmingId = null;
+    render();
+  } else if (ui.editMode) {
+    ui.editMode = false;
+    ui.pendingFocus = 'edit-mode';
     render();
   }
 });
@@ -239,6 +247,7 @@ function checkDay() {
   const now = dateKey();
   if (now === today) return;
   today = now;
+  ui.editMode = false;
   ui.editingId = ui.confirmingId = null;
   render();
   announce('A fresh day. Your pocket is full again.');

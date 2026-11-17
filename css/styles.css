@@ -221,15 +221,11 @@ select {
   gap: 16px;
   grid-template-columns: minmax(0, 1fr);
   grid-template-areas:
-    "add"
     "jar"
     "pocket"
     "week";
 }
 
-.add-card {
-  grid-area: add;
-}
 .jar-card {
   grid-area: jar;
 }
@@ -244,9 +240,8 @@ select {
   .layout {
     gap: 20px;
     grid-template-columns: minmax(300px, 460px) minmax(0, 1fr);
-    grid-template-rows: auto auto 1fr;
+    grid-template-rows: auto 1fr;
     grid-template-areas:
-      "jar add"
       "jar pocket"
       "jar week";
     align-items: start;
@@ -295,8 +290,13 @@ select {
   letter-spacing: -0.005em;
 }
 
-.add-card .card-title {
-  margin-bottom: 12px;
+.add-wrap {
+  margin-top: 20px;
+  padding-top: 4px;
+  border-top: 1px solid var(--line);
+}
+.add-wrap .sub-title {
+  margin-bottom: 10px;
 }
 
 .sub-title {
@@ -553,6 +553,33 @@ select {
 
 /* ---------------------------------------------------------------- pocket */
 
+.pocket-tools {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+.edit-mode-btn {
+  width: auto;
+  min-width: 44px;
+  padding: 0 10px;
+  border-radius: 22px;
+}
+.edit-mode-btn .edit-done {
+  display: none;
+  font-weight: 700;
+  font-size: 0.9rem;
+}
+.edit-mode-btn.is-on {
+  background: var(--sand);
+  color: var(--ink);
+}
+.edit-mode-btn.is-on .icon-edit {
+  display: none;
+}
+.edit-mode-btn.is-on .edit-done {
+  display: inline;
+}
+
 .pocket-meter {
   display: flex;
   align-items: center;
@@ -649,7 +676,6 @@ select {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  cursor: text;
 }
 .habit-weight {
   font-size: 0.8rem;
