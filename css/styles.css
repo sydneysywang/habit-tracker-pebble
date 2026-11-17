@@ -1,4 +1,4 @@
-/* Pebble: warm, organic, tactile. */
+/* Pebbles: warm, organic, tactile. */
 
 :root {
   --paper: #f6f1e7;
@@ -115,6 +115,11 @@ input,
 select {
   font: inherit;
   color: inherit;
+}
+
+/* `hidden` must win over any component display rule (e.g. .pocket-state.is-complete). */
+[hidden] {
+  display: none !important;
 }
 
 :focus-visible {
@@ -553,33 +558,8 @@ select {
   align-items: center;
   gap: 8px;
 }
-.slots {
-  display: flex;
-  gap: 3px;
-}
-.slot {
-  width: 9px;
-  height: 9px;
-  border-radius: 50%;
-  border: 1.5px solid var(--sand-deep);
-}
-.slot--pebble {
-  background: var(--stone-pebble);
-  border-color: var(--stone-pebble);
-}
-.slot--stone {
-  background: var(--stone-stone);
-  border-color: var(--stone-stone);
-}
-.slot--boulder {
-  background: var(--stone-boulder);
-  border-color: var(--stone-boulder);
-}
-.slot.is-out {
-  background: transparent;
-}
 .meter-num {
-  font-size: 0.8rem;
+  font-size: 0.95rem;
   font-weight: 700;
   color: var(--ink-soft);
   font-variant-numeric: tabular-nums;
@@ -592,11 +572,6 @@ select {
   display: grid;
   grid-template-columns: minmax(0, 1fr);
   gap: 6px;
-}
-.habit-list[hidden],
-.done-wrap[hidden],
-.pocket-state[hidden] {
-  display: none;
 }
 
 .habit-row {

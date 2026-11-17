@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project
 
-**Pebble** is a minimalist, low-guilt habit tracker. Habits are weighted stones (Tiny Pebble / Smooth Stone / Heavy Boulder) kept in a limited "Daily Pocket". Ticking a habit drops an organically shaped stone into a 2D physics glass jar. There are no streaks: the pocket refills each day, and an empty pocket is the "done" state. The full approved design plan is at `~/.claude/plans/pasted-content-id-c429-plan-a-curried-dewdrop.md`.
+**Pebbles** is a minimalist, low-guilt habit tracker. Habits are weighted stones (Tiny Pebble / Smooth Stone / Heavy Boulder) kept in a limited "Daily Pocket". Ticking a habit drops an organically shaped stone into a 2D physics glass jar. There are no streaks: the pocket refills each day, and an empty pocket is the "done" state. The full approved design plan is at `~/.claude/plans/pasted-content-id-c429-plan-a-curried-dewdrop.md`.
 
 ## Hard constraints
 
