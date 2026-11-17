@@ -76,7 +76,16 @@
         <ul id="done-list" class="habit-list habit-list--done"></ul>
       </div>
       <div class="add-wrap">
-        <h3 id="add-title" class="sub-title">Pick up a stone</h3>
+        <div class="add-head">
+          <h3 id="add-title" class="sub-title">Pick up a stone</h3>
+          <button id="budget-btn" class="hint-btn" type="button" aria-expanded="false" aria-controls="budget-hint" aria-label="How points work">?</button>
+          <div id="budget-hint" class="hint-bubble">
+            <p>Each habit costs points by weight: <strong>Pebble 1 · Stone 2 · Boulder 3</strong>.</p>
+            <p>Your pocket holds up to <strong id="budget-max">20</strong> points, and it refills every day.</p>
+            <p>Keeping it light is the point: a few habits you can actually finish feel better than a long list that weighs you down.</p>
+            <p class="hint-now">Carrying now: <span id="budget-load">0</span> of <span id="budget-max-2">20</span>.</p>
+          </div>
+        </div>
         <form id="add-form" class="add-form" autocomplete="off" novalidate>
           <label for="habit-name" class="sr-only">New habit</label>
           <input id="habit-name" class="text-input" name="name" type="text" maxlength="40" enterkeyhint="done" placeholder="Drink a glass of water">

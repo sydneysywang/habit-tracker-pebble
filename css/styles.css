@@ -295,8 +295,76 @@ select {
   padding-top: 4px;
   border-top: 1px solid var(--line);
 }
-.add-wrap .sub-title {
-  margin-bottom: 10px;
+.add-head {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: 16px 0 10px;
+}
+.add-head .sub-title {
+  margin: 0;
+}
+
+/* Small "?" next to "Pick up a stone": explains points and the daily limit. */
+.hint-btn {
+  width: 22px;
+  height: 22px;
+  flex: none;
+  display: inline-grid;
+  place-items: center;
+  border: 1.5px solid var(--line);
+  border-radius: 50%;
+  background: var(--paper);
+  color: var(--ink-soft);
+  font: inherit;
+  font-size: 0.75rem;
+  font-weight: 700;
+  line-height: 1;
+  cursor: pointer;
+  position: relative;
+}
+/* Bigger invisible hit area for touch. */
+.hint-btn::after {
+  content: '';
+  position: absolute;
+  inset: -11px;
+}
+.hint-btn:hover,
+.hint-btn[aria-expanded='true'] {
+  background: var(--sand);
+  color: var(--ink);
+}
+.hint-bubble {
+  display: none;
+  position: absolute;
+  top: calc(100% + 8px);
+  left: 0;
+  z-index: 5;
+  width: min(300px, 100%);
+  padding: 10px 12px;
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  box-shadow: var(--shadow);
+  color: var(--ink);
+  font-size: 0.85rem;
+  line-height: 1.45;
+}
+.hint-bubble p + p {
+  margin-top: 6px;
+}
+.hint-bubble .hint-now {
+  color: var(--ink-soft);
+  font-variant-numeric: tabular-nums;
+}
+.hint-btn[aria-expanded='true'] + .hint-bubble {
+  display: block;
+}
+@media (hover: hover) {
+  .hint-btn:hover + .hint-bubble {
+    display: block;
+  }
 }
 
 .sub-title {

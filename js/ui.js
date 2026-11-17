@@ -2,7 +2,7 @@
 // the pocket, the 7-day grid and the labels around the jar. All user text is
 // set with textContent; the only innerHTML is static icon markup.
 
-import { WEIGHTS, WEIGHT_KEYS, NAME_MAX, isDone } from './habits.js';
+import { WEIGHTS, WEIGHT_KEYS, NAME_MAX, POCKET_BUDGET, pocketLoad, isDone } from './habits.js';
 import { lastNDays, keyToDate, longDayLabel } from './dates.js';
 import { chipRadius } from './stones.js';
 
@@ -298,6 +298,8 @@ export function renderApp(refs, state, today, ui) {
   refs.doneWrap.hidden = done.length === 0;
   renderPocketState(refs.pocketState, state, pending.length);
   renderMeter(refs.pocketMeter, state, pending.length);
+  refs.budgetLoad.textContent = pocketLoad(state.habits);
+  for (const el of refs.budgetMax) el.textContent = POCKET_BUDGET;
   renderWeek(refs.weekWrap, state, today);
 
   // Edit mode: the pencil in the pocket header reveals edit/remove on each row.

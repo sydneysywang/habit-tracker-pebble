@@ -19,6 +19,9 @@ const refs = {
   pocketMeter: $('pocket-meter'),
   pocketCard: $('pocket-card'),
   editModeBtn: $('edit-mode-btn'),
+  budgetBtn: $('budget-btn'),
+  budgetLoad: $('budget-load'),
+  budgetMax: [$('budget-max'), $('budget-max-2')],
   weekWrap: $('week-wrap'),
   jarCanvas: $('jar-canvas'),
   jarEmpty: $('jar-empty'),
@@ -182,9 +185,23 @@ refs.pocketCard.addEventListener('submit', (e) => {
   announce('Saved.');
 });
 
+// ------------------------------------------------------------------ budget hint
+
+const hintOpen = () => refs.budgetBtn.getAttribute('aria-expanded') === 'true';
+function setHint(open) {
+  refs.budgetBtn.setAttribute('aria-expanded', String(open));
+}
+refs.budgetBtn.addEventListener('click', () => setHint(!hintOpen()));
+document.addEventListener('click', (e) => {
+  if (hintOpen() && !e.target.closest('.add-head')) setHint(false);
+});
+
 refs.pocketCard.addEventListener('keydown', (e) => {
   if (e.key !== 'Escape') return;
-  if (ui.editingId) cancelEdit();
+  if (hintOpen()) {
+    setHint(false);
+    refs.budgetBtn.focus();
+  } else if (ui.editingId) cancelEdit();
   else if (ui.confirmingId) {
     ui.pendingFocus = `delete:${ui.confirmingId}`;
     ui.confirmingId = null;
