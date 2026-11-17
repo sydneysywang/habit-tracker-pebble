@@ -316,8 +316,6 @@ export function renderApp(refs, state, today, ui) {
   refs.editModeBtn.hidden = !state.habits.length;
   refs.editModeBtn.setAttribute('aria-pressed', String(ui.editMode));
   refs.editModeBtn.classList.toggle('is-on', ui.editMode);
-  refs.editModeBtn.title = ui.editMode ? 'Done editing' : 'Edit habits';
-  refs.editModeBtn.querySelector('.sr-only').textContent = ui.editMode ? 'Done editing habits' : 'Edit habits';
   refs.pocketCard.classList.toggle('is-edit-mode', ui.editMode);
 
   // Labels around the jar
