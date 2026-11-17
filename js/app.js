@@ -21,7 +21,6 @@ const refs = {
   weekWrap: $('week-wrap'),
   jarCanvas: $('jar-canvas'),
   jarEmpty: $('jar-empty'),
-  jarHint: $('jar-hint'),
   todayLabel: $('today-label'),
   live: $('live'),
   mute: $('mute-btn'),

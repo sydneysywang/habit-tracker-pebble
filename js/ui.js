@@ -311,11 +311,6 @@ export function renderApp(refs, state, today, ui) {
   // Labels around the jar
   refs.todayLabel.textContent = longDayLabel(keyToDate(today));
   refs.jarEmpty.hidden = state.habits.length > 0;
-  refs.jarHint.textContent = !state.habits.length
-    ? ''
-    : done.length
-      ? 'Drag the stones around. They like it.'
-      : 'Tick a habit and its stone drops in here.';
   refs.jarCanvas.setAttribute(
     'aria-label',
     done.length
