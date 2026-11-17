@@ -2,7 +2,7 @@
 
 import { load, save, loadPref, savePref, STORAGE_KEY } from './storage.js';
 import { dateKey } from './dates.js';
-import { WEIGHTS, addHabit, editHabit, deleteHabit, toggleDone, isDone } from './habits.js';
+import { WEIGHTS, NAME_MAX, addHabit, editHabit, deleteHabit, toggleDone, isDone } from './habits.js';
 import { createJar } from './physics.js';
 import * as sound from './sound.js';
 import { renderApp, PLACEHOLDERS } from './ui.js';
@@ -287,6 +287,7 @@ window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () 
 
 // ------------------------------------------------------------------ boot
 
+refs.input.maxLength = NAME_MAX; // keep the add input in sync with the limit in habits.js
 shufflePlaceholder();
 render({ initial: true });
 if (!state.habits.length && window.matchMedia('(pointer: fine)').matches) {

@@ -8,7 +8,9 @@ export const WEIGHTS = {
 };
 export const WEIGHT_KEYS = Object.keys(WEIGHTS);
 export const POCKET_BUDGET = 20;
-export const NAME_MAX = 40;
+// 28 normal characters fit on one line of the pocket at 375px; longer names (or very wide
+// letters, or edit mode on a phone) still get an ellipsis as a fallback.
+export const NAME_MAX = 28;
 
 export function cleanName(raw) {
   return String(raw ?? '').replace(/\s+/g, ' ').trim().slice(0, NAME_MAX);
