@@ -2,7 +2,7 @@
 // the pocket, the 7-day grid and the labels around the jar. All user text is
 // set with textContent; the only innerHTML is static icon markup.
 
-import { WEIGHTS, WEIGHT_KEYS, NAME_MAX, isDone } from './habits.js';
+import { WEIGHTS, WEIGHT_KEYS, NAME_MAX, isDone, isJarNearlyFull, pebblesOfRoomLeft } from './habits.js';
 import { lastNDays, keyToDate, longDayLabel } from './dates.js';
 import { chipRadius } from './stones.js';
 
@@ -290,6 +290,26 @@ function renderWeek(wrap, state, today) {
   );
 }
 
+// ------------------------------------------------------------------ jar warnings
+
+/** Shown under the jar and in the pocket once ticked stones fill 80% of the jar. */
+function renderJarWarnings(refs, state, today) {
+  const nearlyFull = isJarNearlyFull(state, today);
+  refs.jarWarning.hidden = !nearlyFull;
+  refs.pocketWarning.hidden = !nearlyFull;
+  if (!nearlyFull) {
+    refs.jarWarning.textContent = '';
+    refs.pocketWarning.textContent = '';
+    return;
+  }
+  refs.jarWarning.textContent = 'Your jar is almost full.';
+  const left = pebblesOfRoomLeft(state.habits);
+  refs.pocketWarning.textContent =
+    left === 0
+      ? 'Your jar is almost full. There’s no room for new habits; let one go to make space.'
+      : `Your jar is almost full. There’s room for ${left} more tiny ${left === 1 ? 'pebble' : 'pebbles'} as new habits.`;
+}
+
 // ------------------------------------------------------------------ main
 
 export function renderApp(refs, state, today, ui) {
@@ -309,6 +329,7 @@ export function renderApp(refs, state, today, ui) {
   // Labels around the jar
   refs.todayLabel.textContent = longDayLabel(keyToDate(today));
   refs.jarEmpty.hidden = state.habits.length > 0;
+  renderJarWarnings(refs, state, today);
   refs.jarCanvas.setAttribute(
     'aria-label',
     done.length

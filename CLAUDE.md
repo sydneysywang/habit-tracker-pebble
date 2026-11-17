@@ -41,7 +41,9 @@ The entry point is `index.html`, which loads `js/app.js` with `<script type="mod
   - The physics works in jar-relative units scaled to the canvas size, which a `ResizeObserver` tracks. That keeps stones inside the jar across resizes.
   - The jar is rebuilt on load from `log[today]`.
   - Sound is synthesized with Web Audio (no audio files). It starts on the first user gesture, triggers on collision impulse with throttling, and has a mute toggle saved in localStorage.
-- **No pocket limit:** any number of habits can be added. The pocket meter shows *stones still in pocket / total habits* (`0/0` when empty). Weight only affects stone size and look.
+- **Jar capacity is the limit** (`js/habits.js`). Each stone takes room = radius² (radii live in `WEIGHTS`, and physics reads them from there). `JAR_CAPACITY = 1500` was measured in the simulation: a settled pile first passes the jar's shoulder at Σr² ≈ 1540. A habit can only be created, or edited to a heavier weight, if *all* habits ticked together would still fit. That's about 13 boulders, 23 stones or 47 pebbles. Stones are never resized.
+- **Near-full warnings:** when today's ticked stones reach 80% of capacity, a warning shows under the jar (`#jar-warning`) and in the pocket (`#pocket-warning`, with how many pebbles' worth of room is left for new habits).
+- **Pocket meter** is a plain count, *stones still in pocket / total habits* (`0/0` when empty), not weighted.
 
 ## Design language
 

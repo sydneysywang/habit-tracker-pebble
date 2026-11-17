@@ -10,13 +10,12 @@
 // - The loop stops once everything has settled and restarts on any change.
 
 import { makeStoneShape, drawStone } from './stones.js';
+import { WEIGHTS, WEIGHT_KEYS } from './habits.js';
 
 export const WORLD_W = 100;
 export const WORLD_H = 126;
-export const RADIUS = { pebble: 5.6, stone: 8, boulder: 10.6 };
+export const RADIUS = Object.fromEntries(WEIGHT_KEYS.map((k) => [k, WEIGHTS[k].radius]));
 const DENSITY = { pebble: 1, stone: 1.05, boulder: 1.2 };
-// Σr² the jar comfortably holds before stones start shrinking (~13 boulders or ~45 pebbles).
-const FILL_R2 = 1300;
 
 // Inner outline of the jar, as an open polyline from the left lip round to the right lip.
 const JAR_PTS = [
@@ -68,7 +67,6 @@ export function createJar(canvas, { onImpact = () => {}, prefersReducedMotion = 
   let drag = null;
   let silent = false;
   let nextId = 1;
-  let sizeScale = 1;
 
   function readColors() {
     const cs = getComputedStyle(canvas);
@@ -86,9 +84,9 @@ export function createJar(canvas, { onImpact = () => {}, prefersReducedMotion = 
 
   // ---------------------------------------------------------------- bodies
 
-  /** Size a body for the current jar fill, keeping mass ∝ area. */
+  /** Mass ∝ area, so heavier-looking stones also push harder. */
   function applySize(b) {
-    const r = (RADIUS[b.weight] || RADIUS.pebble) * sizeScale;
+    const r = RADIUS[b.weight] || RADIUS.pebble;
     const m = r * r * (DENSITY[b.weight] || 1);
     b.r = r;
     b.im = 1 / m;
@@ -142,13 +140,12 @@ export function createJar(canvas, { onImpact = () => {}, prefersReducedMotion = 
     queue = queue.filter((q) => want.get(q.habit.id)?.weight === q.habit.weight);
     const present = new Set([...bodies.map((b) => b.habitId), ...queue.map((q) => q.habit.id)]);
     const toAdd = habits.filter((h) => !present.has(h.id));
-    const resized = fitToJar(habits);
 
     if (prefersReducedMotion()) {
       queue.forEach((q) => addBody(q.habit));
       queue = [];
       toAdd.forEach(addBody);
-      if (toAdd.length || resized) settleNow();
+      if (toAdd.length) settleNow();
       fading = [];
       render();
       return;
@@ -157,21 +154,7 @@ export function createJar(canvas, { onImpact = () => {}, prefersReducedMotion = 
     const now = performance.now();
     toAdd.forEach((h, i) => queue.push({ habit: h, at: now + (initial ? 300 + i * 220 : i * 160) }));
     queue.sort((a, b) => a.at - b.at);
-    if (toAdd.length || fading.length || resized) wake();
-  }
-
-  /**
-   * There is no limit on habits, so once the stones' total area would overflow
-   * the jar, shrink every stone by the same factor so they all stay visible.
-   * Returns true if the size changed.
-   */
-  function fitToJar(habits) {
-    const total = habits.reduce((sum, h) => sum + (RADIUS[h.weight] || RADIUS.pebble) ** 2, 0);
-    const next = Math.min(1, Math.sqrt(FILL_R2 / Math.max(total, 1)));
-    if (Math.abs(next - sizeScale) < 0.001) return false;
-    sizeScale = next;
-    bodies.forEach(applySize);
-    return true;
+    if (toAdd.length || fading.length) wake();
   }
 
   /** Run the simulation silently until everything rests (reduced motion). */

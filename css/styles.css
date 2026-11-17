@@ -538,6 +538,35 @@ select {
   display: none;
 }
 
+.jar-warning,
+.pocket-warning {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 14px;
+  border-radius: 14px;
+  background: color-mix(in srgb, var(--terracotta) 14%, transparent);
+  color: var(--ink);
+  font-size: 0.92rem;
+  font-weight: 600;
+}
+.jar-warning::before,
+.pocket-warning::before {
+  content: "";
+  flex: none;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--terracotta);
+}
+.jar-warning {
+  justify-content: center;
+  margin-top: 12px;
+}
+.pocket-warning {
+  margin-bottom: 12px;
+}
+
 /* ---------------------------------------------------------------- pocket */
 
 .pocket-meter {

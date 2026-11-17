@@ -2,7 +2,7 @@
 
 import { load, save, loadPref, savePref, STORAGE_KEY } from './storage.js';
 import { dateKey } from './dates.js';
-import { WEIGHTS, addHabit, editHabit, deleteHabit, toggleDone, isDone } from './habits.js';
+import { WEIGHTS, addHabit, editHabit, deleteHabit, toggleDone, isDone, jarLoad, stoneRoom, JAR_CAPACITY } from './habits.js';
 import { createJar } from './physics.js';
 import * as sound from './sound.js';
 import { renderApp, PLACEHOLDERS } from './ui.js';
@@ -21,6 +21,8 @@ const refs = {
   weekWrap: $('week-wrap'),
   jarCanvas: $('jar-canvas'),
   jarEmpty: $('jar-empty'),
+  jarWarning: $('jar-warning'),
+  pocketWarning: $('pocket-warning'),
   todayLabel: $('today-label'),
   live: $('live'),
   mute: $('mute-btn'),
@@ -30,6 +32,16 @@ const ERRORS = {
   empty: 'Give your stone a name first, even a tiny one.',
   duplicate: 'That one is already in your pocket.',
 };
+
+/** Message for a rejected add/edit. `excludeId` is the habit being edited, if any. */
+function errorMessage(error, weight, excludeId = null) {
+  if (error !== 'jar-full') return ERRORS[error];
+  const roomLeft = JAR_CAPACITY - jarLoad(state.habits, excludeId);
+  if (roomLeft >= stoneRoom('pebble')) {
+    return `There isn’t room in the jar for a ${WEIGHTS[weight].label}. Try a smaller stone, or let go of a habit.`;
+  }
+  return 'The jar is full. Let go of a habit to make room for a new one.';
+}
 
 let state = load();
 let today = dateKey();
@@ -94,7 +106,7 @@ refs.form.addEventListener('submit', (e) => {
   const weight = new FormData(refs.form).get('weight');
   const result = addHabit(state, refs.input.value, weight);
   if (result.error) {
-    setFormMsg(ERRORS[result.error]);
+    setFormMsg(errorMessage(result.error, weight));
     refs.input.focus();
     return;
   }
@@ -164,7 +176,7 @@ refs.pocketCard.addEventListener('submit', (e) => {
   const data = new FormData(form);
   const result = editHabit(state, id, { name: data.get('name'), weight: data.get('weight') });
   if (result.error) {
-    ui.editError = ERRORS[result.error];
+    ui.editError = errorMessage(result.error, data.get('weight'), id);
     ui.pendingFocus = `editname:${id}`;
     render();
     return;
