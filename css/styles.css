@@ -512,6 +512,17 @@ select {
   height: 14px;
 }
 
+/* Fixed-width box (the boulder's width) so names after a chip all start at the same x. */
+.chip-slot {
+  flex: none;
+  width: 24px;
+  display: inline-grid;
+  place-items: center;
+}
+.chip-slot--sm {
+  width: 16px;
+}
+
 /* ---------------------------------------------------------------- add form */
 
 .add-form {
@@ -850,7 +861,7 @@ select {
   .wk-day-col {
     width: 2rem;
   }
-  .wk-name .chip {
+  .wk-name .chip-slot {
     display: none;
   }
 }

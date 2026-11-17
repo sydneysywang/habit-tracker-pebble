@@ -45,6 +45,15 @@ function chip(habit, extra = '') {
   });
 }
 
+/** A chip centered in a fixed-width slot, so names line up whatever the weight. */
+function chipSlot(habit, small = false) {
+  return h(
+    'span',
+    { class: `chip-slot${small ? ' chip-slot--sm' : ''}`, 'aria-hidden': 'true' },
+    chip(habit, small ? 'chip--sm' : ''),
+  );
+}
+
 // ------------------------------------------------------------------ pocket
 
 function normalRow(habit, done, editMode) {
@@ -64,7 +73,7 @@ function normalRow(habit, done, editMode) {
       h('span', { class: 'tick-box', 'aria-hidden': 'true' }),
       h('span', { class: 'sr-only', text: `${name}, done today` }),
     ),
-    chip(habit),
+    chipSlot(habit),
     h(
       'span',
       { class: 'habit-text' },
@@ -240,7 +249,7 @@ function renderWeek(wrap, state, today) {
       h(
         'th',
         { scope: 'row', class: 'wk-name' },
-        h('span', { class: 'wk-name-inner' }, chip(habit, 'chip--sm'), h('span', { class: 'wk-name-text', title: habit.name, text: habit.name })),
+        h('span', { class: 'wk-name-inner' }, chipSlot(habit, true),h('span', { class: 'wk-name-text', title: habit.name, text: habit.name })),
       ),
       days.map(({ key }) => {
         const done = isDone(state, habit.id, key);
